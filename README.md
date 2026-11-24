@@ -16,8 +16,6 @@ Para reproducir los errores del código anterior y comprobar las correcciones:
 node src/verificar.js
 ```
 
-La reproducción consulta el commit `289476d` con Git, por lo que requiere Git y el historial del repositorio.
-
 ## Preguntas que responde
 
 - ¿Cuánto se vendió, cuántas unidades y registros hay y cuál fue la venta mayor?

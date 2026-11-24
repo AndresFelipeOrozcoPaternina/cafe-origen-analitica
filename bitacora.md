@@ -1,155 +1,72 @@
-SEMANA 1 PRIMERA PARTE
+﻿# Bitácora de Café Origen
 
-• Ciudades: El registro id: 5 tiene "medellín" en minúscula, mientras que los demás tienen "Medellín" con mayúscula inicial. Si no se normaliza, aparecerán como dos ciudades distintas.
-• Cantidades: El registro id: 8 tiene cantidad: 0, lo que representa una venta sin unidades (ingreso $0). Debes decidir si lo excluyes de los cálculos de ventas efectivas.
-• Clientes: Los clientes C01, C02 y C03 aparecen repetidos en varias fechas distintas. Si quieres saber cuántos clientes únicos compraron, no puedes simplemente contar el total de registros (12), sino eliminar duplicados.
+## Primera parte: revisar las ventas
 
-SEGUNDA PARTE 
+Al mirar los datos encontré lo siguiente:
 
-1) FUNCIÓN valorVenta(venta)
-    RETORNAR venta.cantidad * venta.precio
-FIN FUNCIÓN
+- «Medellín» y «medellín» son la misma ciudad y deben quedar juntas.
+- La venta 8 tiene cantidad cero. La dejé en la lista, pero no suma dinero ni unidades y no cuenta para el promedio.
+- Hay clientes que compraron varias veces. Por eso, la cantidad de ventas no es la cantidad de clientes.
 
-2) FUNCIÓN totalVendido(ventas)
-    total <- 0
+## Segunda parte: hacer las cuentas
 
-    PARA CADA venta EN ventas HACER
-        total <- total + valorVenta(venta)
-    FIN PARA
+Para resolver los cálculos seguí estos pasos:
 
-    RETORNAR total
-FIN FUNCIÓN
+1. **Valor de una venta:** multipliqué la cantidad por el precio.
+2. **Total vendido:** sumé el valor de todas las ventas.
+3. **Unidades vendidas:** sumé las cantidades.
+4. **Venta mayor:** comparé las ventas y me quedé con la de mayor valor.
+5. **Ticket promedio:** dividí el dinero vendido entre las ventas con cantidad mayor que cero. Cuando no hay ventas, el resultado es cero.
+6. **Ventas de una ciudad:** busqué las ventas de esa ciudad y sumé su valor.
 
-3) FUNCIÓN unidadesVendidas(ventas)
-    unidades <- 0
+## Tercera parte: reunir los resultados
 
-    PARA CADA venta EN ventas HACER
-        unidades <- unidades + venta.cantidad
-    FIN PARA
+Usé `reduce` para hacer las sumas. Estas fueron mis respuestas a las preguntas del ejercicio:
 
-    RETORNAR unidades
-FIN FUNCIÓN
+| Cálculo | ¿Qué recorro? | ¿Qué filtro? | ¿Qué transformo? | ¿Qué acumulo? | ¿Cómo agrupo? |
+| --- | --- | --- | --- | --- | --- |
+| Total vendido | Todas las ventas | Nada | Cantidad por precio | El dinero vendido | Todo en un solo total |
+| Unidades vendidas | Todas las ventas | Nada | Nada | Las cantidades | Todo en una sola suma |
+| Cantidad de registros por ciudad | Todas las ventas | Nada | Nombres sin espacios sobrantes y en minúsculas | Un registro por cada venta | Por ciudad |
+| Dinero por ciudad | Todas las ventas | Nada | Los nombres y el valor de cada venta | El dinero vendido | Por ciudad |
+| Unidades por producto | Todas las ventas | Nada | Nombres sin espacios sobrantes y en minúsculas | Las cantidades | Por producto |
+| Productos que más dinero generan | Las ventas y los totales por producto | Al final tomo los tres primeros | Los nombres y el valor de cada venta | El dinero vendido | Por producto, de mayor a menor valor |
 
-4) FUNCIÓN ventaMayor(ventas)
-    mayorRegistro <- null
+## Cuarta parte: revisar los errores
 
-    PARA CADA venta EN ventas HACER
-        SI mayorRegistro == null O valorVenta(venta) > valorVenta(mayorRegistro) ENTONCES
-            mayorRegistro <- venta
-        FIN SI
-    FIN PARA
+### Error 1: la venta mayor daba cero
 
-    RETORNAR mayorRegistro
-FIN FUNCIÓN
+- **Síntoma:** salía 0 en vez de la venta mayor. Sin ventas, salía `undefined`.
+- **Entrada que lo produce:** la lista de las 12 ventas o una lista vacía.
+- **Hipótesis:** pensé que la función terminaba antes de revisar todas las ventas.
+- **Prueba realizada:** mostré el resultado con `console.log` y confirmé que daba 0. Después de corregirlo, comprobé que saliera la venta 10, de $168.000, y `null` si no había ventas.
+- **Causa:** empezaba comparando con el número 0 como si fuera una venta. Además, terminaba en la primera vuelta.
+- **Corrección:** empecé sin una venta elegida y dejé la respuesta para después de revisar toda la lista.
 
-5) FUNCIÓN ticketPromedio(ventas)
-    sumaValida <- 0
-    cantidadVentasValidas <- 0
+### Error 2: el promedio no salía bien
 
-    PARA CADA venta EN ventas HACER
-        SI venta.cantidad > 0 ENTONCES
-            sumaValida <- sumaValida + valorVenta(venta)
-            cantidadVentasValidas <- cantidadVentasValidas + 1
-        FIN SI
-    FIN PARA
+- **Síntoma:** al calcular el promedio aparecía un error. Sin ventas, salía `NaN`.
+- **Entrada que lo produce:** calcular el promedio con las ventas del proyecto o con una lista vacía.
+- **Hipótesis:** pensé que la suma estaba mal y que faltaba revisar el caso sin ventas.
+- **Prueba realizada:** ejecuté el cálculo y usé `console.log` para revisar los fallos. Después comprobé que el promedio fuera $985.000 dividido entre 11 ventas, y cero cuando no hubiera ventas o la cantidad fuera cero.
+- **Causa:** pasaba una sola venta donde se esperaba la lista completa. También intentaba dividir las funciones en lugar de los números que necesitaba.
+- **Corrección:** sumé el dinero y conté las ventas con cantidad mayor que cero. Luego hice la división. Si no hay ninguna, devuelvo cero.
 
-    SI cantidadVentasValidas == 0 ENTONCES
-        RETORNAR 0
-    FIN SI
+## Revisar ciudades y productos
 
-    RETORNAR sumaValida / cantidadVentasValidas
-FIN FUNCIÓN
+Comprobé que «Medellín» y «medellín» quedaran juntas. El reporte muestra cuatro ciudades y Medellín suma $356.000.
 
-6) FUNCIÓN ventasPorCiudad(ventas, ciudad)
-    totalCiudad <- 0
-    ciudadBuscada <- MINUSCULAS(RECORTAR_ESPACIOS(ciudad))
+También revisé los nombres de los productos para que las mayúsculas y los espacios no hicieran aparecer el mismo producto dos veces.
 
-    PARA CADA venta EN ventas HACER
-        ciudadActual <- MINUSCULAS(RECORTAR_ESPACIOS(venta.ciudad))
+## Revisar las ventas de un día
 
-        SI ciudadActual == ciudadBuscada ENTONCES
-            totalCiudad <- totalCiudad + valorVenta(venta)
-        FIN SI
-    FIN PARA
+Usé `ventasDelDia` para buscar las ventas por fecha:
 
-    RETORNAR totalCiudad
-FIN FUNCIÓN
+- **1 de septiembre de 2026:** dos ventas, tres unidades y $110.000.
+- **7 de septiembre de 2026:** ninguna venta. El reporte muestra «Sin ventas» y los valores quedan en cero.
 
-TERCERA PARTE: MÉTODOS DE ARREGLO Y LAS 5 PREGUNTAS SOBRE COLECCIONES
+## Revisión del reporte
 
-1) FUNCIÓN totalVendidoM(ventas)
-- ¿Qué recorro?: El arreglo completo de ventas (`ventas`).
-- ¿Qué filtro?: Ninguno (se consideran todas las ventas).
-- ¿Qué transformo?: Cada objeto venta a su importe monetario (`valorVenta(venta)` o `venta.cantidad * venta.precio`) mediante `.map()`.
-- ¿Qué acumulo?: La suma total de los importes calculados en una variable acumuladora numérica inicializada en 0 mediante `.reduce()`.
-- ¿Cómo agrupo?: No aplica (se reduce a un único valor escalar global).
+Ejecuté el reporte y revisé las cuatro secciones: resumen general, ventas por ciudad, unidades por producto y los tres productos que más dinero generan.
 
-2) FUNCIÓN unidadesVendidasM(ventas)
-- ¿Qué recorro?: El arreglo completo de ventas (`ventas`).
-- ¿Qué filtro?: Ninguno (se procesan todos los registros).
-- ¿Qué transformo?: No se requiere transformación intermedia, se lee directamente `venta.cantidad`.
-- ¿Qué acumulo?: La suma acumulada de las unidades vendidas (`venta.cantidad`) iniciando en 0 mediante `.reduce()`.
-- ¿Cómo agrupo?: No aplica (se totaliza en un único valor numérico).
-
-3) FUNCIÓN ventasPorCiudadM(ventas, ciudad)
-- ¿Qué recorro?: El arreglo de ventas (`ventas`).
-- ¿Qué filtro?: Filtra únicamente los registros donde el nombre de la ciudad coincida con la ciudad buscada (limpiando espacios con `.trim()` y en minúsculas con `.toLowerCase()`) mediante `.filter()`.
-- ¿Qué transformo?: Cada venta filtrada se transforma a su valor monetario (`valorVenta(venta)`) mediante `.map()`.
-- ¿Qué acumulo?: La suma total del dinero generado para esa ciudad específica mediante `.reduce()`, iniciando en 0.
-- ¿Cómo agrupo?: No aplica agrupamiento en objeto (filtra por una ciudad en particular).
-
-4) FUNCIÓN totalPorCiudad(ventas)
-- ¿Qué recorro?: El arreglo completo de ventas (`ventas`).
-- ¿Qué filtro?: Ninguno (se toman todas las ventas).
-- ¿Qué transformo?: El nombre de la ciudad a un formato estándar normalizado (eliminando espacios en los extremos con `.trim()` y asegurando mayúscula inicial y minúsculas posteriores, ej. "Medellín", "Bogotá") y cada venta a su valor monetario.
-- ¿Qué acumulo?: El valor total de ventas sumado por cada ciudad dentro de un objeto acumulador que funciona como diccionario (`{}`).
-- ¿Cómo agrupo?: Utilizando el nombre normalizado de la ciudad como clave en el objeto diccionario: `acumulador[ciudad] = (acumulador[ciudad] || 0) + valorVenta(venta)`.
-
-5) FUNCIÓN unidadesPorProducto(ventas)
-- ¿Qué recorro?: El arreglo completo de ventas (`ventas`).
-- ¿Qué filtro?: Ninguno (se evalúan todos los registros).
-- ¿Qué transformo?: El nombre del producto limpiando posibles espacios residuales (`.trim()`).
-- ¿Qué acumulo?: La suma total de unidades (`venta.cantidad`) por cada producto dentro de un objeto acumulador (`{}`).
-- ¿Cómo agrupo?: Por el nombre del producto como clave del diccionario: `acumulador[producto] = (acumulador[producto] || 0) + venta.cantidad`.
-
-6) FUNCIÓN topProductosPorValor(ventas, k)
-- ¿Qué recorro?: Primero una copia del arreglo `ventas` (creada con `[...]`), y posteriormente el arreglo de pares generado por `Object.entries()`.
-- ¿Qué filtro?: No se descartan ventas inicialmente; al final se extraen los primeros `k` elementos mediante `.slice(0, k)`.
-- ¿Qué transformo?: Con `Object.entries()`, el objeto diccionario de totales se transforma en un arreglo bidimensional de pares `[producto, totalValor]`.
-- ¿Qué acumulo?: El dinero generado por cada producto mediante `.reduce()`, sumando `valorVenta(venta)`.
-- ¿Cómo agrupo?: Por el nombre de producto en el diccionario intermedio. Luego se ordenan los grupos de mayor a menor según el valor acumulado usando `.sort((a, b) => b[1] - a[1])`.
-
-CUARTA PARTE: INTEGRACIÓN Y DEPURACIÓN — v0.1
-
-El enunciado recibido no transcribe los dos síntomas de la gerente. Se investigan los dos fallos observables en las funciones del MiniReto anterior: venta mayor y ticket promedio. También se comprueba la advertencia inicial sobre ciudades duplicadas.
-
-ERROR 1: VENTA MAYOR INCORRECTA
-- Síntoma: ventaMayor devuelve 0 en lugar del registro de mayor valor; con [] devuelve undefined.
-- Entrada que lo produce: los 12 registros de datos.js; también el arreglo vacío.
-- Hipótesis: el acumulador no comienza como registro o null y el retorno impide recorrer todas las ventas.
-- Prueba realizada: src/verificar.js carga con vm el código del commit 289476d y usa console.log estratégico para mostrar ventaMayor(ventas). Comprueba que devuelve 0. Luego exige a la versión corregida el id 10, valor 168000, y null para [].
-- Causa: mayor se inicializaba en 0; valorVenta(0) produce NaN y la comparación nunca selecciona un registro. El return estaba dentro del ciclo y terminaba la búsqueda en la primera vuelta.
-- Corrección: inicializar mayor en null, conservar la comparación y devolver el resultado después del ciclo, como propone el pseudocódigo original.
-
-ERROR 2: TICKET PROMEDIO FALLA O PRODUCE NaN
-- Síntoma: TypeError con datos; NaN con un arreglo vacío.
-- Entrada que lo produce: ticketpromedio(ventas) y ticketpromedio([]).
-- Hipótesis: se pasa un registro donde se espera un arreglo y se dividen funciones en lugar de números.
-- Prueba realizada: src/verificar.js ejecuta la versión 289476d y verifica el TypeError por entrada no iterable y el NaN para []. Un console.log estratégico identifica ambos casos. Para la corrección exige 985000 / 11, cero con [] y cero con un registro de cantidad 0.
-- Causa: totalVendido(venta) y unidadesVendidas(venta) intentan recorrer un objeto. Además, totalVendido / unidadesVendidas divide referencias a funciones. Tampoco existía protección contra un denominador vacío.
-- Corrección: conservar el ciclo y aplicar el pseudocódigo de la segunda parte: sumar importes y contar registros con cantidad positiva; devolver 0 si no hay ventas efectivas. El ticket es por venta efectiva, no por unidad.
-
-COMPROBACIÓN DE GRUPOS Y FECHAS
-- Ciudades duplicadas: TotalPorCiudadM ya usa trim().toLowerCase(). La prueba exige exactamente cuatro ciudades; Medellín y medellín suman 356000 en un mismo grupo. Una entrada adicional con espacios demuestra la normalización.
-- Productos: topProductosPorValor solo recortaba espacios; se añadió toLowerCase(), igual que en unidadesPorProducto, para que ambos cálculos tengan la misma agrupación. Se prueba con « Café » y «café»: un grupo, tres unidades y valor 300.
-- Día con ventas: 2026-09-01 tiene dos registros, tres unidades y total 110000.
-- Día sin ventas: 2026-09-07 devuelve []; el informe muestra «Sin ventas», cero registros, cero unidades y valores monetarios en cero.
-- Se preservan require, ciclos y reduce, las firmas existentes y los datos originales. Se retira el console.log automático al importar analitica.js para separar cálculo y presentación.
-- Verificación reproducible: node src/verificar.js ejecuta además el reporte completo, rechaza NaN y undefined y exige las cuatro secciones. Los agrupamientos se comparan con resultados esperados y se ejecutan los cálculos sobre datos congelados para detectar mutaciones.
-
-RESULTADO DE EJECUCIÓN (2026-11-24)
-- Ejecutado src/reporte.js con Node.js v22.16.0 portátil: salida correcta, cuatro secciones y detalle de ambos días.
-- Ejecutado src/verificar.js: todas las aserciones pasan; se reproducen los errores originales y se comprueban las correcciones, grupos normalizados y ausencia de NaN y undefined en la salida completa.
-- Resultado general: 12 registros, 11 ventas efectivas, 21 unidades, ingreso de 985000 COP, ticket promedio de 89545,45 COP y mayor venta de 168000 COP (id 10).
-- git diff --check sin errores de espacios.
-- El equipo no tenía node en PATH; se usó una distribución portátil fuera del repositorio, sin agregar dependencias al proyecto.
+El total fue de $985.000 y 21 unidades. Comprobé que no hubiera grupos repetidos ni aparecieran `NaN` o `undefined`. También revisé que las cuentas no cambiaran los datos originales.
