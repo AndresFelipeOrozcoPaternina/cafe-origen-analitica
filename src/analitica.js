@@ -46,41 +46,27 @@ function unidadesVendidas(ventas){
 }
  
 
-function ventaMayor(ventas){
-
-  let mayor=0;
-
+function ventaMayor(ventas) {
+  let mayor = null;
   for (const venta of ventas) {
-    if(mayor == null || valorVenta(venta) > valorVenta(mayor))
-    {
-
-      mayor=venta;
-
+    if (mayor === null || valorVenta(venta) > valorVenta(mayor)) {
+      mayor = venta;
     }
-     return mayor
-
-    }
-
+  }
+  return mayor;
 }
 
-
-function ticketpromedio(ventas){
-
-
- for (const venta of ventas) {
-    
-     totalVendido(venta);
-     unidadesVendidas(venta)
-
-
+function ticketpromedio(ventas) {
+  let sumaValida = 0;
+  let cantidadVentasValidas = 0;
+  for (const venta of ventas) {
+    if (venta.cantidad > 0) {
+      sumaValida += valorVenta(venta);
+      cantidadVentasValidas += 1;
     }
-    
-  let prom = totalVendido/unidadesVendidas;
-
-    return prom;
+  }
+  return cantidadVentasValidas === 0 ? 0 : sumaValida / cantidadVentasValidas;
 }
-
-
 function ventasPorCiudad(ventas, ciudad){
   let ciudadbuscada= ciudad.trim().toLowerCase();
   let cantidad = 0;
@@ -152,7 +138,7 @@ function topProductosPorValor(ventas, k) {
   const copiaVentas = [...ventas];
 
   const totalesPorProducto = copiaVentas.reduce((acc, venta) => {
-    const prod = venta.producto.trim();
+    const prod = venta.producto.trim().toLowerCase();
     acc[prod] = (acc[prod] || 0) + valorVenta(venta);
     return acc;
   }, {});
@@ -165,7 +151,9 @@ function topProductosPorValor(ventas, k) {
 
 //==================================================== Llamada de los datos ==========================================================================================================
 
-console.log(unidadesPorProducto(ventas));
+function ventasDelDia(ventas, fecha) {
+  return ventas.filter(venta => venta.fecha === fecha);
+}
 
 
 
@@ -182,7 +170,6 @@ module.exports = {
   ventasPorCiudadM,
   TotalPorCiudadM,
   unidadesPorProducto,
-  topProductosPorValor
+  topProductosPorValor,
+  ventasDelDia
 };
-
-console.log
